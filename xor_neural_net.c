@@ -32,6 +32,46 @@ void shuffle(int *array, size_t n)
         }
     }
 }
+
+
+
+
+
+double practice(double input1,double input2, double hLayerB[], double outLayerB[], double hWeights[][2], double outWeights[][1])
+{
+        double inputs[2] = {input1,input2};
+        double hiddenlayer[2];
+
+        double outputlayer[1];
+        for(size_t j =0;j<2;j++)
+        {
+            double activation = hLayerB[j];
+            for(size_t k=0; k<2;k++)
+            {
+                 activation+=inputs[k]*hWeights[k][j];
+
+            }
+            hiddenlayer[j]=sigmoid(activation);
+
+        }
+                        // compute output layers activation
+        for(size_t j=0;j<1;j++)
+        {
+             double activation = outLayerB[j];
+             for(size_t k=0; k<2;k++)
+             {
+                    activation+=hiddenlayer[k]*outWeights[k][j];
+
+             }
+             outputlayer[j] = sigmoid(activation);
+        }
+        
+        return outputlayer[0];
+
+}
+
+
+
 int main()
 {
         static const size_t nmInp = 2;
@@ -78,7 +118,7 @@ int main()
 
         }
 
-        for(size_t n =0; n<10000; n++)
+        for(size_t n =0; n<100000; n++)
         {
                 shuffle(trainingSetOrder,numTrainingSets);
                 for(size_t x=0; x<numTrainingSets;x++)
@@ -196,7 +236,7 @@ int main()
                 printf("%f ",outLayerB[j]);
                 printf("]\n");
 
-        }
+        }	
 /*      
         FILE* outputweights = fopen("Outputweights.txt","w+");
         for(size_t j=0; j<numOutputs;j++)
@@ -255,8 +295,18 @@ FILE* hiddenbias = fopen("Hiddenbias","w+");
         }
         fclose(hiddenbias);
 
+
 */
-        return 0;
+	printf("Résultat du XOR avec 0 et 0 comme entrées %f\n", practice(0.0f,0.0f,hLayerB,outLayerB,hWeights,outWeights));
+	printf("Résultat du XOR avec 0 et 1 comme entrées %f\n", practice(0.0f,1.0f,hLayerB,outLayerB,hWeights,outWeights));
+	printf("Résultat du XOR avec 1 et 0 comme entrées %f\n", practice(1.0f,0.0f,hLayerB,outLayerB,hWeights,outWeights));
+	printf("Résultat du XOR avec 1 et 1 comme entrées %f\n", practice(1.0f,1.0f,hLayerB,outLayerB,hWeights,outWeights));
+	return 1;
+        
 
 }
-	
+
+
+
+
+
