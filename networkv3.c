@@ -29,7 +29,7 @@ void shuffle(int *array, size_t n)
     }
 }
 
-double main(int argc, const *argv[], double trinp,double trint, static const int ntrainset)
+double main(int argc, const *argv[], double trinp,double trout, static const int ntrainset)
 {
   const double learning_rate = 0.1f;
 
@@ -81,7 +81,7 @@ double main(int argc, const *argv[], double trinp,double trint, static const int
 		}
 		for(int j=0;j<numOutputs;j++)
 		{
-			double activation = outputLayersBias[j];
+			double activation = outputLayerBias[j];
 			for(int k=0; k<numHiddenNodes;k++)
 			{
 				activation+=hiddenLayer[k]*outputWeights[k][j];
@@ -92,7 +92,7 @@ double main(int argc, const *argv[], double trinp,double trint, static const int
 		double deltaOutputs[numOutputs]
 		for(int j=0; j<numOutputs;j++)
 		{
-			double dError = (training_outputs[i][j]-outputLayer[j]);
+			double dError = (trout[i][j]-outputLayer[j]);
 			deltaOutputs[j] = dError*dSigmoid(outputLayer[j]);
 
 
@@ -120,7 +120,7 @@ double main(int argc, const *argv[], double trinp,double trint, static const int
 			HiddenLayerBias[j] += deltaHiddens[j]*learning_rate;
 			for(int k = 0; k<numInputs; k++)
 			{
-				hiddenWeights[k][j] += traininginputs[i][k]*deltaHiddens[j]*lr; 
+				hiddenWeights[k][j] += trinp[i][k]*deltaHiddens[j]*learning_rate; 
 
 			}
 		}
@@ -128,5 +128,94 @@ double main(int argc, const *argv[], double trinp,double trint, static const int
 	}
 
   }
+
+
+  printf("Final Hidden Weights\n");
+  for(int j=0; j<numHiddenNodes;j++)
+      {
+
+           for(int k =0;k<numInputs;k++)
+           {
+                    printf("[ ");
+
+                    printf("%f ",hiddenWeights[k][j]);
+                    printf("]\n ");
+           }
+
+       }
+
+
+   printf(" Final Hidden Biases\n");
+   for(int j=0; j<numHiddenNodes;j++)
+        {    
+	     	printf("[");
+
+                printf("%f",hiddenLayerBias[j]);
+                printf("]\n ");
+
+        }
+   printf("Final Output Weightd\n");
+   for(int j=0; j<numOutputs;j++)
+   {
+
+        for(int k=0; k< numHiddenNodes ;k++)
+           {       printf("[");
+                   printf("%f", outputWeights[k][j]);
+                   printf("]\n ");
+
+            }
+    }
+    printf("Final Output Biases\n");
+    for(int j=0; j<numOutputs;j++)
+    {
+            printf("[");
+	    printf("%f ",outputLayerBias[j]);
+            printf("]\n");
+
+    }
+
+
+
+
   return 0;
 }
+
+
+
+
+size_t practice(double grayscale[])
+{
+        for(size_t j =0;j<numHiddenNodes;j++)
+        {
+          double activation = hiddenLayerBias[j];
+          for(size_t k=0; k<numInputs;k++)
+          {
+              activation+=grayscale[k]*hiddenWeights[k][j];
+
+          }
+          hiddenLayer[j]=sigmoid(activation);
+        }
+        for(size_t j=0;j<numOutputs;j++)
+        {
+            double activation = outputLayersBias[j];
+            for(size_t k=0; k<numHiddenNodes;k++)
+            {
+               activation+=hiddenLayer[k]*outputWeights[k][j];
+
+            }
+            outputLayer[j] = sigmoid(activation);
+        }
+        size_t max = 0;
+        for(size_t j =0; j<numOutputs;j++)
+        {
+                if(outputLayer[j]>outputLayer[max])
+                {
+                        max = j;
+                }
+
+        }
+        return max+1;
+
+
+}
+
