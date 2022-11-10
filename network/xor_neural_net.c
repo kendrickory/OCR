@@ -194,10 +194,10 @@ int main()
 
         }
         printf("Final Hidden Weights\n");
-	for(int j=0; j<nmHNodes;j++)
+	for(size_t j=0; j<nmHNodes;j++)
         {
 
-                for(int k =0;k<nmInp;k++)
+                for(size_t k =0;k<nmInp;k++)
                 {
                         printf("[ ");
 
@@ -210,7 +210,7 @@ int main()
 
 
         printf(" Final Hidden Biases\n");
-        for(int j=0; j<nmHNodes;j++)
+        for(size_t j=0; j<nmHNodes;j++)
         {       printf("[");
 
                 printf("%f",hLayerB[j]);
@@ -218,10 +218,10 @@ int main()
 
         }
         printf("Final Output Weightd\n");
-        for(int j=0; j<nmOut;j++)
+        for(size_t j=0; j<nmOut;j++)
         {
 
-                for(int k=0; k< nmHNodes ;k++)
+                for(size_t k=0; k< nmHNodes ;k++)
                 {       printf("[");
                         printf("%f", outWeights[k][j]);
                         printf("]\n ");
@@ -230,7 +230,7 @@ int main()
 
         }
         printf("Final Output Biases\n");
-        for(int j=0; j<nmOut;j++)
+        for(size_t j=0; j<nmOut;j++)
         {
                 printf("[");
                 printf("%f ",outLayerB[j]);
