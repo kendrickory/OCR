@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
     adaptative_threshold(image);
     IMG_SavePNG(image, "/home/francois.halbout/afs/Junior-master/sudoku-solver/image/threshold.png");
     //dilatation(image);
-    //IMG_SavePNG(image, "/home/maxime.cambou/afs/SPE/sudoku-solver/dilatation.png");
+    //IMG_SavePNG(image,"");
     invert(image);
     IMG_SavePNG(image, "/home/francois.halbout/afs/Junior-master/sudoku-solver/image/invert.png");
     SDL_Surface *copy = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_RGBA8888, 0);
