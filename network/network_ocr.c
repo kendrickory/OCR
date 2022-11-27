@@ -1,6 +1,4 @@
 static const int numTrainingSets =10;
-double training_inputs[numTrainingSets][numInputs] = {{}{}{}{}{}{}{}{}{}{}};
-double training_outputs[numTrainingSets][numOutputs] = {{}{}{}{}{}{}{}{}{}};
 double init_weight()
 {
         return ((double)rand())/((double)RAND_MAX);

@@ -237,66 +237,27 @@ int main()
                 printf("]\n");
 
         }	
-/*      
-        FILE* outputweights = fopen("Outputweights.txt","w+");
-        for(size_t j=0; j<numOutputs;j++)
+ 	FILE *outputweights = NULL;     
+        outputweights = fopen("Outputweights.txt","w");
+        for(size_t j=0; j<nmOut;j++)
         {
-                for(size_t k=0; k<numHiddenNodes;k++)
+                for(size_t k=0; k<nmHNodes;k++)
                 {
-                        char *s ="";
-                        double d = outputWeights[k][j];
-                        sprintf(s,"%.2lf",d);
                         
-                        fputs(s,outputweights);
-                        fputs("\n", outputweights);
+                        double d = outWeights[k][j];
+                        fprintf(outputweights,"%f\n",d);
+                        
+                        
+                        
 
                 }
         }
         fclose(outputweights);
         
         
-        FILE* hiddenweights = fopen("Hiddenweights","w+");
-        for(size_t j=0; j<numHiddenNodes;j++)
-        {
-                for(int k =0 ; k<numInputs; k++)
-                {
-                        char *s="";
-                        double d = hiddenWeights[k][j];
-                        sprintf(s,"%.2lf",d);
-                        
-                        fputs(s,hiddenweights);
-                        fputs("\n",hiddenweights);
-                }
-        }
-        fclose(hiddenweights);
-
-        FILE* outputbias = fopen("Outputbias", "w+");
-        for(size_t j=0; j<numOutputs;j++)
-        {
-                char *s="";
-                double d = outputLayerBias[j];
-                sprintf(s,"%.2lf",d);
-                
-                fputs(s,outputbias);
-                fputs("\n",outputbias);
-        }
 
 
-        fclose(outputbias);
-FILE* hiddenbias = fopen("Hiddenbias","w+");
-        for(size_t j=0; j<numHiddenNodes; j++)
-        {
-                char *s ="";
-                double d = hiddenLayerBias[j];
-                sprintf(s,"%.2lf",d);
-                
-                fputs(s,hiddenbias);
-                fputs("\n",hiddenbias);
-        }
-        fclose(hiddenbias);
 
-
-*/
 	printf("Résultat du XOR avec 0 et 0 comme entrées %f\n", practice(0.0f,0.0f,hLayerB,outLayerB,hWeights,outWeights));
 	printf("Résultat du XOR avec 0 et 1 comme entrées %f\n", practice(0.0f,1.0f,hLayerB,outLayerB,hWeights,outWeights));
 	printf("Résultat du XOR avec 1 et 0 comme entrées %f\n", practice(1.0f,0.0f,hLayerB,outLayerB,hWeights,outWeights));
