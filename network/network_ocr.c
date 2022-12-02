@@ -1,7 +1,67 @@
 static const int numTrainingSets =10;
+FILE *labels;
+labels = fopen("train-labels.idx1-ubyte","rb");
+int magic_number_lab;
+int num_lab;
+fread(&magic_number_lab,sizeof(int),1,labels);
+fread(&num_lab,sizeof(int),1,labels);
+double expected_result[num_lab];
+unsigned char label;
+while(fread(&label,sizeof(unsigned char),1,labels) != EOF))
+{
+	expected_result.append((double)label);
+
+}
+FILE *images;
+images = fopen("train-images.idx3-ubyte","rb");
+int magic_number_image;
+int num_im;
+fread(&magic_number_image,sizeof(int),1,images);
+fread(&num_im,sizeof(int),1,images);
+
+double training_inputs[num_in][784];
+unsigne char pix;
+int x =0;
+int y=0;
+while(fread(&pix,sizeof(unsigned char),1,images) != EOF))
+{
+	
+        training_inputs[x].append((double)label);
+	y++;
+	if(y>=784)
+	{
+		y=0;
+		x++;
+	}
+
+}
+
+fclose(labels);
+fclose(images);
 double init_weight()
 {
         return ((double)rand())/((double)RAND_MAX);
+}
+double softmax(double raw_inp, double raw_list[])
+{
+	double sum = 0;
+	for(size_t i=0; i<10;i++)
+	{
+		sum+= exp(raw_list[i]);
+	}
+	return raw_inp/sum;
+}
+double Dsoftmax(size_t x,double num,size_t y,double denum)
+{
+	if(y==x)
+	{
+		return num*(1-num);
+	}
+	return (-1)*num*denum;
+}
+double cross(double prob, double expected)
+{
+	return (-1)*log(prob)*expected;
 }
 double sigmoid(double z)
 {
@@ -27,7 +87,8 @@ void shuffle(int *array, size_t n)
     }
 }
 
-double main(int argc, const *argv[], double trinp,double trout, static const int ntrainset)
+
+double train(int argc, const *argv[], double trinp,double trout, static const int ntrainset)
 {
   const double learning_rate = 0.1f;
 
@@ -216,4 +277,4 @@ size_t practice(double grayscale[])
 
 
 }
-
+double train();
