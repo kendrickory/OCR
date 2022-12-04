@@ -51,6 +51,16 @@ double softmax(double raw_inp, double raw_list[])
 	}
 	return raw_inp/sum;
 }
+size_t which_result(double expected_result[])
+{
+	for(size_t i=0;i<10;i++)
+	{
+		if(expected_result[i]==0)
+		{
+			return i;
+		}
+	}
+}
 double Dsoftmax(size_t x,double num,size_t y,double denum)
 {
 	if(y==x)
@@ -59,13 +69,24 @@ double Dsoftmax(size_t x,double num,size_t y,double denum)
 	}
 	return (-1)*num*denum;
 }
-double cross(double prob, double expected)
+double cross(double prob)
 {
-	return (-1)*log(prob)*expected;
+	return (-1)*log(prob);
 }
 double sigmoid(double z)
 {
         return 1/(1+exp(-z));
+}
+double dcross(double z, size_t expected, size_t output)
+{
+	if(expected==output)
+	{
+		return z-1;
+	}
+	else
+	{
+		return z;
+	}
 }
 double dSigmoid(double z)
 {
@@ -88,7 +109,7 @@ void shuffle(int *array, size_t n)
 }
 
 
-double train(int argc, const *argv[], double trinp,double trout, static const int ntrainset)
+double train(double trinp[],double trout[], static const int ntrainset)
 {
   const double learning_rate = 0.1f;
 
@@ -101,6 +122,9 @@ double train(int argc, const *argv[], double trinp,double trout, static const in
   double outputLayerBias[numOutputs];
   double hiddenWeights[numInputs][numHiddenNodes];
   double outputWeights[numHiddenNodes][numOutputs];
+  double soft_result[ntrainset];
+  double cross_result[ntrainset];
+  double dcross_sum[numOutputs];
   for(int i=0; i<numInputs;i++)
   {
 	  for(j=0;j<numHiddenNodes;j++)
@@ -120,11 +144,15 @@ double train(int argc, const *argv[], double trinp,double trout, static const in
   {
 	  outputLayerBias[i] = init_weight();
   }
-  int trainingSetOrder[] = {0,1,2,3};
+  int trainingSetOrder[trainingset] ;
+  for(int i =0; i<trainingset;i++)
+  {
+	  trainingSetOrder[i] = i;
+  }
   for(int n =0; n<10000;n++)
   {
 	
-	shuffle(trainigSetOrder,numTrainingSets);
+	shuffle(trainingSetOrder,trainingset);
 	for(int x=0; x<numTrainingSets;x++)
 	{
 		int i = trainingSetOrder[x];
@@ -148,6 +176,19 @@ double train(int argc, const *argv[], double trinp,double trout, static const in
 			}
 			outputLayer[j] = sigmoid(activation);
 		}
+		size_t index_expected = wich_result(training_inputs[i]);
+		double Rawoutput[numOutputs] = outputLayer;
+		for(intj=0; j<numOutputs;j++)
+		{
+			outputLayer[j] = softmax(outputLayer[j],Rawoutput);
+		}
+		soft_result[index_expected] = outputLayer[index_expected];
+		cross_result[index_expected] = cross(outputLayer[index_expected]);
+		for(int p = 0; p<numOutputs;p++)
+		{
+			dcross_sum[p]+=dcross(outputLayer[p],p,index_expected);
+		}
+		double Dcross = outpulLayer[index_expected]-1;
 		double deltaOutputs[numOutputs]
 		for(int j=0; j<numOutputs;j++)
 		{
@@ -185,9 +226,20 @@ double train(int argc, const *argv[], double trinp,double trout, static const in
 		}
 
 	}
+	double total_cross =0;
+  	for(size_t i=0; i<numtrainset; i++)
+  	{
+          	total_cross+= cross_result[i];
+  	}
+
+  	for(size_t i=0; i<numOutputs; i++)
+  	{
+          	double step_size = dcross_sum[i]*learning_rate;
+          	OutputBias[i] = OutputBIas[i]-step-size;
+  	}
+
 
   }
-
 
   printf("Final Hidden Weights\n");
   for(int j=0; j<numHiddenNodes;j++)
