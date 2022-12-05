@@ -19,7 +19,7 @@ int num_im;
 fread(&magic_number_image,sizeof(int),1,images);
 fread(&num_im,sizeof(int),1,images);
 
-double training_inputs[num_in][784];
+double training_inputs[num_im][784];
 unsigne char pix;
 int x =0;
 int y=0;
@@ -114,7 +114,7 @@ double train(double trinp[],double trout[], static const int ntrainset)
   const double learning_rate = 0.1f;
 
   static const int numInputs = 784;
-  static const int numHiddenNodes = 100;
+  static const int numHiddenNodes = 30;
   static const int numOutputs = 10;
   double hiddenLayer[numHiddenNodes];
   double outputLayer[numOutputs];
@@ -122,9 +122,10 @@ double train(double trinp[],double trout[], static const int ntrainset)
   double outputLayerBias[numOutputs];
   double hiddenWeights[numInputs][numHiddenNodes];
   double outputWeights[numHiddenNodes][numOutputs];
-  double soft_result[ntrainset];
+  
   double cross_result[ntrainset];
-  double dcross_sum[numOutputs];
+  
+  double total_cross = 100;
   for(int i=0; i<numInputs;i++)
   {
 	  for(j=0;j<numHiddenNodes;j++)
@@ -144,12 +145,12 @@ double train(double trinp[],double trout[], static const int ntrainset)
   {
 	  outputLayerBias[i] = init_weight();
   }
-  int trainingSetOrder[trainingset] ;
-  for(int i =0; i<trainingset;i++)
+  int trainingSetOrder[ntraingset] ;
+  for(int i =0; i<ntrainset;i++)
   {
 	  trainingSetOrder[i] = i;
   }
-  for(int n =0; n<10000;n++)
+  while(total_cross>0.05)
   {
 	
 	shuffle(trainingSetOrder,trainingset);
@@ -161,7 +162,7 @@ double train(double trinp[],double trout[], static const int ntrainset)
 			double activation = hiddenLayerBias[j];
 			for(int k=0; k<numInputs;k++)
 			{
-				activation+=training_inputs[i][k]*hiddenWeights[k][j];
+				activation+=trinp[i][k]*hiddenWeights[k][j];
 
 			}
 			hiddenLayer[j]=sigmoid(activation);
@@ -182,18 +183,15 @@ double train(double trinp[],double trout[], static const int ntrainset)
 		{
 			outputLayer[j] = softmax(outputLayer[j],Rawoutput);
 		}
-		soft_result[index_expected] = outputLayer[index_expected];
-		cross_result[index_expected] = cross(outputLayer[index_expected]);
-		for(int p = 0; p<numOutputs;p++)
-		{
-			dcross_sum[p]+=dcross(outputLayer[p],p,index_expected);
-		}
-		double Dcross = outpulLayer[index_expected]-1;
+		
+		cross_result[i] = cross(outputLayer[index_expected]);
+		
+		
 		double deltaOutputs[numOutputs]
 		for(int j=0; j<numOutputs;j++)
 		{
 			double dError = (trout[i][j]-outputLayer[j]);
-			deltaOutputs[j] = dError*dSigmoid(outputLayer[j]);
+			deltaOutputs[j] = dError*dsoftmax(index_expected,outputLayer[index_expected],j,outputLayer[j]);
 
 
 		}
@@ -226,64 +224,59 @@ double train(double trinp[],double trout[], static const int ntrainset)
 		}
 
 	}
-	double total_cross =0;
+	total_cross=0;
   	for(size_t i=0; i<numtrainset; i++)
   	{
           	total_cross+= cross_result[i];
   	}
 
-  	for(size_t i=0; i<numOutputs; i++)
-  	{
-          	double step_size = dcross_sum[i]*learning_rate;
-          	OutputBias[i] = OutputBIas[i]-step-size;
-  	}
+ 
 
 
   }
 
-  printf("Final Hidden Weights\n");
-  for(int j=0; j<numHiddenNodes;j++)
-      {
+  FILE *outputweights = NULL;
+  outputweights = fopen("Outputweights.txt","w");
+  for(size_t j=0; j<nmOut;j++)
+  {
+       for(size_t k=0; k<nmHNodes;k++)
+       {
 
-           for(int k =0;k<numInputs;k++)
-           {
-                    printf("[ ");
-
-                    printf("%f ",hiddenWeights[k][j]);
-                    printf("]\n ");
-           }
-
-       }
+              double d = outWeights[k][j];
+              fprintf(outputweights,"%f\n",d);
 
 
-   printf(" Final Hidden Biases\n");
-   for(int j=0; j<numHiddenNodes;j++)
-        {    
-	     	printf("[");
 
-                printf("%f",hiddenLayerBias[j]);
-                printf("]\n ");
 
         }
-   printf("Final Output Weightd\n");
-   for(int j=0; j<numOutputs;j++)
-   {
+  }
+  for(size_t j=0; j<numhiddenNodes;j++)
+  {
+	  for(size_t k=0; k<numInputs; k++)
+	  {
+		  double d = hiddenWeights[k][j];
+                  fprintf(outputweights,"%f\n",d);
+	  }
+  }
 
-        for(int k=0; k< numHiddenNodes ;k++)
-           {       printf("[");
-                   printf("%f", outputWeights[k][j]);
-                   printf("]\n ");
 
-            }
-    }
-    printf("Final Output Biases\n");
-    for(int j=0; j<numOutputs;j++)
-    {
-            printf("[");
-	    printf("%f ",outputLayerBias[j]);
-            printf("]\n");
+  for(size_t j=0; j<numhiddenNodes;j++)
+  {
+	  double d = hiddenBias[j];
+	  fprintf(outputweights,"%f\n",d);
 
-    }
+  }
+  for(size_t j=0; j<numOuputs;j++)
+  {
+          double d = OuputLayerBias[j];
+          fprintf(outputweights,"%f\n",d);
+
+  }
+
+
+  fclose(outputweights);
+  
+
 
 
 
@@ -316,6 +309,12 @@ size_t practice(double grayscale[])
             }
             outputLayer[j] = sigmoid(activation);
         }
+	double Rawoutput[numOutputs] = outputLayer;
+            for(intj=0; j<numOutputs;j++)
+            {
+                outputLayer[j] = softmax(outputLayer[j],Rawoutput);
+            }
+
         size_t max = 0;
         for(size_t j =0; j<numOutputs;j++)
         {
@@ -325,7 +324,7 @@ size_t practice(double grayscale[])
                 }
 
         }
-        return max+1;
+        return max;
 
 
 }
