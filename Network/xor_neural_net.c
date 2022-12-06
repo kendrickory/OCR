@@ -238,7 +238,7 @@ int main()
 
         }	
  	FILE *outputweights = NULL;     
-        outputweights = fopen("Outputweights.txt","w");
+        outputweights = fopen("Outputweights.txt","w+");
         for(size_t j=0; j<nmOut;j++)
         {
                 for(size_t k=0; k<nmHNodes;k++)
@@ -252,7 +252,21 @@ int main()
 
                 }
         }
+
+
         fclose(outputweights);
+	
+	FILE *outputout = NULL;
+        outputout = fopen("Outputweights.txt","r");
+	char str[1000];
+	while(fgets(str,1000,outputout)!=NULL)
+	{
+		char * vIn = str;
+		double vOut = strtod(vIn,NULL);
+
+		printf("%f\n",vOut);
+	}	
+	fclose(outputout);
         
         
 

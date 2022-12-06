@@ -1,3 +1,13 @@
+#include <err.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <stdlib.h>
+
+
+#include <stdio.h>
+#include <math.h>
+
+
 static const int numTrainingSets =10;
 FILE *labels;
 labels = fopen("train-labels.idx1-ubyte","rb");
@@ -5,7 +15,7 @@ int magic_number_lab;
 int num_lab;
 fread(&magic_number_lab,sizeof(int),1,labels);
 fread(&num_lab,sizeof(int),1,labels);
-double expected_result[num_lab];
+double expected_result_write[num_lab];
 unsigned char label;
 while(fread(&label,sizeof(unsigned char),1,labels) != EOF))
 {
@@ -19,7 +29,7 @@ int num_im;
 fread(&magic_number_image,sizeof(int),1,images);
 fread(&num_im,sizeof(int),1,images);
 
-double training_inputs[num_im][784];
+double training_inputs_write[num_im][784];
 unsigne char pix;
 int x =0;
 int y=0;
@@ -38,6 +48,111 @@ while(fread(&pix,sizeof(unsigned char),1,images) != EOF))
 
 fclose(labels);
 fclose(images);
+SDL_Surface* load_image(const char* path)
+{
+
+
+    SDL_Surface* pres = IMG_Load(path);
+
+    if (pres==NULL)
+            errx(EXIT_FAILURE,"%s",IMG_GetError());
+    SDL_Surface* s = SDL_ConvertSurfaceFormat(pres,SDL_PIXELFORMAT_RGB888,0);
+
+    if (s == NULL)
+            errx(EXIT_FAILURE,"%s",SDL_GetError());
+    SDL_FreeSurface(pres);
+    return s;
+}
+Uint32 pixel_to_grayscale(Uint32 pixel_color, SDL_PixelFormat* format)
+{
+
+    Uint8 r, g, b;
+    SDL_GetRGB(pixel_color, format, &r, &g, &b);
+
+    Uint8 average = 0.3*r + 0.59*g + 0.11*b;
+    r = average;
+    b = average;
+    g = average;
+    Uint32 color = SDL_MapRGB(format,r,g,b);
+    return color;
+}
+
+double[] surface_to_grayscale(SDL_Surface* surface)
+{
+    Uint32* pixels = surface->pixels;
+    int len = surface->w * surface->h;
+    SDL_PixelFormat* format = surface->format;
+    double grayscale[len];
+    int lock = SDL_LockSurface(surface);
+    if(lock!=0)
+    {
+            errx(EXIT_FAILURE, "Lock of surface failed");
+    }
+    int y = 0;
+    for(size_t i  = 0; y<len; i++ )
+    {
+
+
+            pixels[i]= pixel_to_grayscale(pixels[i], format);
+            y++;
+	    grayscale[i] = (double)pixels[i];
+
+    }
+    SDL_UnlockSurface(surface);
+    return grayscale;
+}
+
+double[] get_grayscale(const char* path)
+{
+	SDL_Surface* s = load_image(path);
+        return surface_to_grayscale(s);	
+}
+double training_inputs_artif[524][784]; 
+double training_label_artif[524];
+
+char* address = malloc(sizeof(char)*16);
+*(address) = 'n';
+*(address+1)= 'u';
+*(address+2)='m';
+*(address+3)='/';
+*(address+5)='.';
+*(address+7)='.';
+*(address+9)='.';
+*(address+10)='1';
+*(address+12)='.';
+*(address+13)='p';
+*(address+14)='n';
+*(address+15)='g';
+size_t ind_im =0;
+for(int i=0; i<10; i++)
+{
+	char num = i+'0';
+	*(address+4)= num;
+	for(int j = 0; j<=5; j++)
+	{
+		char style = j+'0';
+		*(address+2) = style;
+		for(int k=0; i<5;k++)
+		{
+			char genre = k+'0';
+			*(address+8)=genre;
+			for(int x =1; x<=4; x*2)
+			{
+				char pol_size = x+'0';
+				*(address+11)=pol_size;
+				training_inputs_artif[ind_im]= get_grayscale[address];
+				training_label_artif[ind_im] = i;
+				ind_im++;
+			}
+		}
+	}
+	
+}
+
+
+
+
+
 double init_weight()
 {
         return ((double)rand())/((double)RAND_MAX);
@@ -109,7 +224,7 @@ void shuffle(int *array, size_t n)
 }
 
 
-double train(double trinp[],double trout[], static const int ntrainset)
+double train(double trinp[][],double trout[], static const int ntrainset)
 {
   const double learning_rate = 0.1f;
 
@@ -236,7 +351,7 @@ double train(double trinp[],double trout[], static const int ntrainset)
   }
 
   FILE *outputweights = NULL;
-  outputweights = fopen("Outputweights.txt","w");
+  outputweights = fopen("Outputweights.txt","w+");
   for(size_t j=0; j<nmOut;j++)
   {
        for(size_t k=0; k<nmHNodes;k++)
@@ -289,6 +404,72 @@ double train(double trinp[],double trout[], static const int ntrainset)
 
 size_t practice(double grayscale[])
 {
+	static const int numInputs = 784;
+  	static const int numHiddenNodes = 30;
+  	static const int numOutputs = 10;
+  	double hiddenLayer[numHiddenNodes];
+  	double outputLayer[numOutputs];
+  	double hiddenLayerBias[numHiddenNodes];
+  	double outputLayerBias[numOutputs];
+  	double hiddenWeights[numInputs][numHiddenNodes];
+  	double outputWeights[numHiddenNodes][numOutputs];
+
+	FILE *outputout = NULL;
+        outputout = fopen("Outputweights.txt","r");
+        char str[1000];
+	int nhnw = 0;
+	int now = 0;
+        while(fgets(str,1000,outputout)!=NULL && nhnw<numHiddenNodes)
+        {
+                char * vIn = str;
+                double vOut = strtod(vIn,NULL);
+		outputWeights[nhnw][now];
+		now++;
+		if(now>=numOutputs)
+		{
+			now=0;
+			nhnw++;
+		}
+        }
+	now=0;
+	nhnw=0;
+	int ninp=0;
+	while(fgets(str,1000,outputout)!=NULL && ninp<numInputs)
+        {
+                char * vIn = str;
+                double vOut = strtod(vIn,NULL);
+                hiddenWeights[ninp][nhnw];
+                nhnw++;
+                if(nhnw>=numHiddenNodes)
+                {
+                        nhnw=0;
+                        ninp++;
+                }
+        }
+	ninp=0;
+	nhnw =0;
+	while(fgets(str,1000,outputout)!=NULL && nhnw<numHiddenNodes)
+        {
+                char * vIn = str;
+                double vOut = strtod(vIn,NULL);
+                hiddenLayerBias[nhnw];
+                nhnw++;
+                
+        }
+	while(fgets(str,1000,outputout)!=NULL && nhnw<numOutputs)
+        {
+                char * vIn = str;
+                double vOut = strtod(vIn,NULL);
+                hiddenLayerBias[now];
+                now++;
+
+        }
+
+	
+
+	
+        fclose(outputout);
+
         for(size_t j =0;j<numHiddenNodes;j++)
         {
           double activation = hiddenLayerBias[j];
@@ -328,4 +509,10 @@ size_t practice(double grayscale[])
 
 
 }
-double train();
+double main(double grayscale[])
+{
+	
+	train(traning_inputs_artif,training_label,524);
+	return practice(grayscale);
+
+};
